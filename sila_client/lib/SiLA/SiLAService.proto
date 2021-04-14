@@ -1,0 +1,94 @@
+syntax = "proto3";
+
+import "SiLAFramework.proto";
+
+package sila2.org.silastandard.core.silaservice.v1;
+
+service SiLAService {
+    rpc GetFeatureDefinition(sila2.org.silastandard.core.silaservice.v1.GetFeatureDefinition_Parameters) returns (sila2.org.silastandard.core.silaservice.v1.GetFeatureDefinition_Responses) {}
+    rpc SetServerName(sila2.org.silastandard.core.silaservice.v1.SetServerName_Parameters) returns (sila2.org.silastandard.core.silaservice.v1.SetServerName_Responses) {}
+    rpc Get_ServerName(sila2.org.silastandard.core.silaservice.v1.Get_ServerName_Parameters) returns (sila2.org.silastandard.core.silaservice.v1.Get_ServerName_Responses) {}
+    rpc Get_ServerType(sila2.org.silastandard.core.silaservice.v1.Get_ServerType_Parameters) returns (sila2.org.silastandard.core.silaservice.v1.Get_ServerType_Responses) {}
+    rpc Get_ServerUUID(sila2.org.silastandard.core.silaservice.v1.Get_ServerUUID_Parameters) returns (sila2.org.silastandard.core.silaservice.v1.Get_ServerUUID_Responses) {}
+    rpc Get_ServerDescription(sila2.org.silastandard.core.silaservice.v1.Get_ServerDescription_Parameters) returns (sila2.org.silastandard.core.silaservice.v1.Get_ServerDescription_Responses) {}
+    rpc Get_ServerVersion(sila2.org.silastandard.core.silaservice.v1.Get_ServerVersion_Parameters) returns (sila2.org.silastandard.core.silaservice.v1.Get_ServerVersion_Responses) {}
+    rpc Get_ServerVendorURL(sila2.org.silastandard.core.silaservice.v1.Get_ServerVendorURL_Parameters) returns (sila2.org.silastandard.core.silaservice.v1.Get_ServerVendorURL_Responses) {}
+    rpc Get_ImplementedFeatures(sila2.org.silastandard.core.silaservice.v1.Get_ImplementedFeatures_Parameters) returns (sila2.org.silastandard.core.silaservice.v1.Get_ImplementedFeatures_Responses) {}
+}
+
+message DataType_FeatureIdentifier {
+    sila2.org.silastandard.String FeatureIdentifier = 1;
+}
+
+message DataType_FeatureDefinition {
+    sila2.org.silastandard.String FeatureDefinition = 1;
+}
+
+message DataType_URL {
+    sila2.org.silastandard.String URL = 1;
+}
+
+message GetFeatureDefinition_Parameters {
+    sila2.org.silastandard.core.silaservice.v1.DataType_FeatureIdentifier QualifiedFeatureIdentifier = 1;
+}
+
+message GetFeatureDefinition_Responses {
+    sila2.org.silastandard.core.silaservice.v1.DataType_FeatureDefinition FeatureDefinition = 1;
+}
+
+message SetServerName_Parameters {
+    sila2.org.silastandard.String ServerName = 1;
+}
+
+message SetServerName_Responses {
+}
+
+message Get_ServerName_Parameters {
+}
+
+message Get_ServerName_Responses {
+    sila2.org.silastandard.String ServerName = 1;
+}
+
+message Get_ServerType_Parameters {
+}
+
+message Get_ServerType_Responses {
+    sila2.org.silastandard.String ServerType = 1;
+}
+
+message Get_ServerUUID_Parameters {
+}
+
+message Get_ServerUUID_Responses {
+    sila2.org.silastandard.String ServerUUID = 1;
+}
+
+message Get_ServerDescription_Parameters {
+}
+
+message Get_ServerDescription_Responses {
+    sila2.org.silastandard.String ServerDescription = 1;
+}
+
+message Get_ServerVersion_Parameters {
+}
+
+message Get_ServerVersion_Responses {
+    sila2.org.silastandard.String ServerVersion = 1;
+}
+
+message Get_ServerVendorURL_Parameters {
+}
+
+message Get_ServerVendorURL_Responses {
+    sila2.org.silastandard.core.silaservice.v1.DataType_URL ServerVendorURL = 1;
+}
+
+message Get_ImplementedFeatures_Parameters {
+}
+
+message Get_ImplementedFeatures_Responses {
+    repeated sila2.org.silastandard.core.silaservice.v1.DataType_FeatureIdentifier ImplementedFeatures = 1;
+}
+
