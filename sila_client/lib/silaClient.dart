@@ -125,14 +125,53 @@ class SilaClient {
         (request) => request.writeToBuffer(), // Write request message to buffer
         (response) {
           var responseValues = parseSilaResponse(feature.commands[commandId].outputs, response);
-          return genericSiLAMessage.commandResponse(command.name, command.outputs, responseValues);
+          return genericSiLAMessage.commandResponse("${command.name}_Responses", command.outputs, responseValues);
     });
 
-    genericSiLAMessage requestMessage = genericSiLAMessage.commandRequest(command.name, command.inputs, commandParams);
+    genericSiLAMessage requestMessage = genericSiLAMessage.commandRequest("${command.name}_Parameters", command.inputs, commandParams);
     var response =
         await _rawClient.$createUnaryCall(clientMethod, requestMessage);
     return response;
   }
+
+  getProperty(var featureId, var propertyId) async {
+    Feature feature = features[featureId];
+    Property property = feature.properties[propertyId];
+
+    // Build a client call for the command
+    ClientMethod clientMethod = ClientMethod(
+        '/${feature.packageName}.${feature.serviceName}/Get_${feature.properties[propertyId].name}',
+            (request) => request.writeToBuffer(), // Write request message to buffer
+            (response) {
+          var responseValues = parseSilaResponse(property.outputs, response);
+          return genericSiLAMessage.propertyResponse("Get_${property.name}_Responses", property.outputs, responseValues);
+        });
+
+    genericSiLAMessage requestMessage = genericSiLAMessage.propertyRequest("Get_${property.name}_Parameters");
+    var response =
+    await _rawClient.$createUnaryCall(clientMethod, requestMessage);
+    return response;
+  }
+
+  Future<Stream> subscribeProperty(var featureId, var propertyId) async {
+    Feature feature = features[featureId];
+    Property property = feature.properties[propertyId];
+
+    // Build a client call for the command
+    ClientMethod clientMethod = ClientMethod(
+        '/${feature.packageName}.${feature.serviceName}/Subscribe_${feature.properties[propertyId].name}',
+            (request) => request.writeToBuffer(), // Write request message to buffer
+            (response) {
+          var responseValues = parseSilaResponse(property.outputs, response);
+          return genericSiLAMessage.propertyResponse("Subscribe_${property.name}_Responses", property.outputs, responseValues);
+        });
+
+    genericSiLAMessage requestMessage = genericSiLAMessage.propertyRequest("Subscribe_${property.name}_Parameters");
+    var responseStream =
+    _rawClient.$createStreamingCall(clientMethod, Stream.fromIterable([requestMessage]));
+    return responseStream;
+  }
+
 
   callStreamCommand(var featureId, var commandId, var commandParams) async {
     Feature feature = features[featureId];
