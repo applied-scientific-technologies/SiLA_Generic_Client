@@ -38,8 +38,9 @@ class SilaClient {
   connectToServer() async {
     _channel = new ClientChannel(serverIp,
         port: serverPort,
-        options: const ChannelOptions(
-            credentials: const ChannelCredentials.insecure()));
+        options: ChannelOptions(
+            credentials: ChannelCredentials.secure(onBadCertificate: (cert,str)=>true))
+        );
 
     print(_channel.toString());
 
@@ -172,25 +173,70 @@ class SilaClient {
     return responseStream;
   }
 
+  // Observable commands are managed using 3 (4 if streaming) rpc calls
+  // Command Execution RPC-> Initialises the command, returns UUID (CommandConfirmation)
+  // Info RPC -> Subscribes to current status of the command
+  // Result RPC -> Retrieves final result of command execution
+  // Intermediate RPC  -> Gets intermediate responses from command execution (not always used, defined in feature)
 
-  callStreamCommand(var featureId, var commandId, var commandParams) async {
+
+  Future<sila.CommandConfirmation> callObsCommand(var featureId, var commandId, var commandParams) async {
+
+    try {
+      Feature feature = features[featureId];
+      Command command = feature.commands[commandId];
+
+      // Build a client call for the command
+      ClientMethod clientMethod = ClientMethod(
+          '/${feature.packageName}.${feature.serviceName}/${feature
+              .commands[commandId].name}',
+              (request) => request.writeToBuffer(),
+          // Write request message to buffer
+              (response) {
+            var commandStatus = sila.CommandConfirmation.fromBuffer(response);
+            return genericSiLAMessage.commandResponse(
+                command.name, [["CommandConfirm", "CommandConfirmation"]], [commandStatus]);
+          });
+
+      genericSiLAMessage requestMessage = genericSiLAMessage.commandRequest(
+          command.name, command.inputs, commandParams);
+      var response = await _rawClient.$createUnaryCall(
+          clientMethod, requestMessage);
+      return response.getField(1);
+    }
+    catch (Ex){
+      print(Ex);
+    }
+  }
+
+  subscribeObsCommandInfo(var featureId, var commandId, sila.CommandConfirmation commandUUID) async
+  {
+    // CommandIdentifer_Info
+    return Stream.fromIterable([]);
+  }
+
+  getsObsCommandResult(var featureId, var commandId, sila.CommandConfirmation commandUUID) async {
+    // CommandIdentifier_Result
+    // This is the actual 'response' of the command
     Feature feature = features[featureId];
     Command command = feature.commands[commandId];
 
     // Build a client call for the command
     ClientMethod clientMethod = ClientMethod(
-        '/${feature.packageName}.${feature.serviceName}/${feature.commands[commandId].name}',
-        (request) => request.writeToBuffer(),
-        // Write request message to buffer
-        (response) {
-      var responseValues = parseSilaResponse(feature.commands[commandId].outputs, response);
-      return genericSiLAMessage.commandResponse(command.name, command.outputs, responseValues);
-    });
+        '/${feature.packageName}.${feature.serviceName}/${feature.commands[commandId].name}_Result',
+            (request) => request.writeToBuffer(), // Write request message to buffer
+            (response) {
+          var responseValues = parseSilaResponse(feature.commands[commandId].outputs, response);
+          return genericSiLAMessage.commandResponse("${command.name}_Responses", command.outputs, responseValues);
+        });
 
-    genericSiLAMessage requestMessage = genericSiLAMessage.commandRequest(command.name, command.inputs, commandParams);
-    var response = await _rawClient.$createStreamingCall(
-        clientMethod, Stream.fromIterable([requestMessage]));
+    var response =
+        await _rawClient.$createUnaryCall(clientMethod, commandUUID);
     return response;
+  }
+ subscribeObsIntermediate(var featureId, var commandId, sila.CommandConfirmation commandUUID) async
+  {
+    return Stream.fromIterable([]);
   }
 
   void parseResponse(typeMap, List<int> response) {

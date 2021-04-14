@@ -5,26 +5,30 @@ import 'package:fixnum/fixnum.dart';
 
 void main() async {
 
-  SilaClient _client = SilaClient("192.168.10.5", 50051);
+  SilaClient _client = SilaClient("192.168.10.5", 50052);
   await _client.connectToServer();
 
+  // Observable Command
+  var obs_command_response = await _client.callObsCommand(1,0, [true]);
+
+
   // HelloWorld Example
-  //var command_response = await _client.callCommand(2, 0, ["Joe"]);
-  //var property_response = await _client.getProperty(2, 0);
+  var command_response = await _client.callCommand(0, 0, ["Joe"]);
+  var property_response = await _client.getProperty(0, 0);
 
-  var sub_stream = await _client.subscribeProperty(2, 0);
+ // var sub_stream = await _client.subscribeProperty(, 0);
 
-  sub_stream.listen((event) {
-    print(event);
-  });
+  //sub_stream.listen((event) {
+  //  print(event);
+  //});
 
   //Observable Property Example
-  var command_response = await _client.callCommand(2, 0, [Int64(100)]);
-  await Future.delayed(Duration(seconds: 10));
-  command_response = await _client.callCommand(2, 0, [Int64(200)]);
-  await Future.delayed(Duration(seconds: 10));
-  command_response = await _client.callCommand(2, 0, [Int64(300)]);
-  await Future.delayed(Duration(seconds: 10));
+  //var command_response = await _client.callCommand(2, 0, [Int64(100)]);
+  //await Future.delayed(Duration(seconds: 10));
+  //command_response = await _client.callCommand(2, 0, [Int64(200)]);
+  //await Future.delayed(Duration(seconds: 10));
+  //command_response = await _client.callCommand(2, 0, [Int64(300)]);
+  //await Future.delayed(Duration(seconds: 10));
 
 
 

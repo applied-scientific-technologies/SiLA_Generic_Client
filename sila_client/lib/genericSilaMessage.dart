@@ -11,6 +11,8 @@ class genericSiLAMessage extends GeneratedMessage {
   genericSiLAMessage();
 
 
+
+
   genericSiLAMessage.propertyRequest(this.messageName); // Property requests have no fields
   genericSiLAMessage.propertyResponse(
       this.messageName, this.paramTypeName, this.paramVals) {
@@ -29,9 +31,10 @@ class genericSiLAMessage extends GeneratedMessage {
         setField(fieldNo, responseVal);
       } else if (paramType == "Real") {
         setField(fieldNo, responseVal);
-        // OTHER SILA TYPES HERE ...
+        //Other types here
       } else {
-        print("UNKNOWN TYPE");
+        print("Unknown type");
+        setField(fieldNo, responseVal);
       }
     }
   }
@@ -78,8 +81,11 @@ class genericSiLAMessage extends GeneratedMessage {
         setField(fieldNo, responseVal);
       } else if (paramType == "Real") {
         setField(fieldNo, responseVal);
-        // OTHER SILA TYPES HERE ...
-      } else {
+      } else if (paramType == "CommandConfirm"){
+        setField(fieldNo, responseVal);
+      } else if (paramType == "CommandExecInfo") {
+        setField(fieldNo, responseVal);
+      }else {
         print("UNKNOWN TYPE");
       }
     }
@@ -113,7 +119,12 @@ class genericSiLAMessage extends GeneratedMessage {
       } else if (type == "Real") {
         _info.aOM(fieldNo, name, subBuilder: sila.Real.create);
         // OTHER SILA TYPES HERE ...
-      } else {
+      } else if (type == "CommandConfirm") {
+        _info.aOM(fieldNo, name, subBuilder: sila.CommandConfirmation.create);
+      } else if (type == "CommandExecInfo") {
+        _info.aOM(fieldNo, name, subBuilder: sila.ExecutionInfo.create);
+      }
+      else{
         print("UNKNOWN TYPE");
       }
     }
