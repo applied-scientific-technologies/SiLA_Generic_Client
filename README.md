@@ -50,15 +50,19 @@ the parsing of the definition.
 To call a command or property the ID (index) of the feature it's contained in must be found and then the ID (index) of the property, at present the easiest way to do this is to
 insert a breakpoint after the client has connected and examine the features and inspect the commands and their expected inputs
 
+![InspectWindow](https://user-images.githubusercontent.com/971940/114873314-116e7f00-9df3-11eb-9125-95df041e934a.png)
+
 For example the HelloWorld server provides a `GreetingProvider` feature, within this feature is the `SayHello` command which takes a string as input and outputs a string
 
-In the client the `GreetingProvider` is stored a Feature 0 and the `SayHello` command as Command 0
+In the client the `GreetingProvider` is stored as Feature 0 and the `SayHello` command as Command 0
+
 So this command can be called by using the `callCommand()` function and passing in the Feature Index, Command Index and a list of parameter values
+
 `await _client.callCommand(0,0,["Testing"]);`
 
 This will call the command return a generic message containing the string output
-Similar calls are also implemented for properties and observables, subscribing commands will return a stream which can be listened to for incoming responses rather
-than a single response message
+
+Similar calls are also implemented for properties and observables, subscribing commands will return a stream which can be listened to for incoming responses rather than a single response message
 
 *Note that only a few of the basic types are supported at present so commands requiring more complex parameters will not yet work (Lists / Structs / etc)*
 
