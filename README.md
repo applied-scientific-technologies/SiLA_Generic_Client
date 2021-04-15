@@ -25,8 +25,8 @@ Left to right Android, iOS
 Left to right Linux, MacOS, Windows
 <p float="left">
 <img src="sila_client/screenshots/silaClientLinux.png" alt="LinuxClient" width="200">
-<img src="sila_client/screenshots/silaClientMacOS.png" alt="MacOSClient" width="200">
-<img src="sila_client/screenshots/silaClientWIn.png" alt="WindowsClient" width="200">
+<img src="sila_client/screenshots/silaClientMacOS.png" alt="MacOSClient" width="300">
+<img src="sila_client/screenshots/silaClientWIn.png" alt="WindowsClient" width="300">
 </p>
 
 ## Installation 
