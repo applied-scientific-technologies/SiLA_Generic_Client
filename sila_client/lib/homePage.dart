@@ -3,6 +3,7 @@ import 'package:grpc/grpc.dart';
 import 'package:sila_client/silaClient.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:sila_client/SiLA/SiLAFramework.pb.dart' as sila;
+import 'package:sila_client/widgets/dialogUtil.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -14,8 +15,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  var serverAddress = '192.168.0.53:50052';
   final tfc = TextEditingController(text: '192.168.0.53:50052');
+
+  var serverAddress = '192.168.0.53:50052';
+  var secureConnection = true;
   List<Feature> features = [];
   SilaClient _client;
   String outputText = "";
@@ -41,37 +44,62 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(20.0),
-                        child: ElevatedButton(
-                            child: Text('Connect to server and list features'),
-                            onPressed: () async {
-                              setState(() {
-                                outputText = '';
-                                features = [];
-                              });
-                              var ip = tfc.text.split(':')[0];
-                              var port = int.tryParse(tfc.text.split(':')[1]);
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(15.0),
+                              child: ElevatedButton(
+                                  child: Text(
+                                      'Connect to server and list features'),
+                                  onPressed: () async {
+                                    setState(() {
+                                      outputText = '';
+                                      features = [];
+                                    });
+                                    var ip = tfc.text.split(':')[0];
+                                    var port =
+                                        int.tryParse(tfc.text.split(':')[1]);
 
-                              if (ip != null && port != null) {
-                                try {
-                                  _client = SilaClient(ip, port, true);
-                                  await _client.connectToServer();
+                                    if (ip != null && port != null) {
+                                      try {
+                                        _client = SilaClient(
+                                            ip, port, secureConnection);
+                                        await _client.connectToServer();
 
+                                        setState(() {
+                                          features = _client.features;
+                                        });
+
+                                        //need to handle closing the connection to the server
+                                        //Uncomment this line to call '' in the hello world server
+                                        // await testHelloWorld(_client);
+                                      } catch (e) {
+                                        //show error message, something has gone wrong
+                                        await DialogUtil.messageDialog(
+                                            context,
+                                            'Error',
+                                            'Something went wrong connecting to server');
+                                      }
+                                    } else {
+                                      //something wrong with IP and port
+                                      await DialogUtil.messageDialog(
+                                          context,
+                                          'Error',
+                                          'Something went wrong connecting to server');
+                                    }
+                                  }),
+                            ),
+                            Text('Secure connection?'),
+                            Checkbox(
+                                value: secureConnection,
+                                onChanged: (newVal) {
                                   setState(() {
-                                    features = _client.features;
+                                    secureConnection = newVal;
                                   });
-
-                                  //need to handle closing the connection to the server
-                                  //Uncomment this line to call '' in the hello world server
-                                  // await testHelloWorld(_client);
-                                } catch (e) {
-                                  //show error message, something has gone wrong
-                                  print('Something has gone wrong');
-                                }
-                              } else {
-                                //something wrong with IP and port
-                                print('Something has gone wrong');
-                              }
-                            }),
+                                }),
+                          ],
+                        ),
                       ),
                       Padding(
                           padding: const EdgeInsets.all(20.0),
