@@ -32,16 +32,38 @@ class SilaClient {
   List<Feature> features = [];
   List clientCalls = [];
   Client _rawClient;
+  bool secureConnection = true;
 
-  SilaClient(this.serverIp, this.serverPort);
+  SilaClient(this.serverIp, this.serverPort, this.secureConnection);
 
   connectToServer() async {
-    _channel = new ClientChannel(serverIp,
-        port: serverPort,
-        options: ChannelOptions(
-            credentials: ChannelCredentials.secure(onBadCertificate: (cert,str)=>true))
-        );
 
+
+    if (!secureConnection) {
+      try {
+        _channel = new ClientChannel(serverIp,
+            port: serverPort,
+            options: ChannelOptions(
+                credentials: ChannelCredentials.insecure())
+        );
+      }
+      catch (Ex) {
+        print("Failure to connect - handle here");
+      }
+    }
+    else {
+      // Try connecting without passthrough - if fail try passthrough for selfsigned but alert user
+    try{
+      _channel = new ClientChannel(serverIp,
+          port: serverPort,
+          options: ChannelOptions(
+              credentials: ChannelCredentials.secure(
+                  onBadCertificate: (cert, str) => true))
+      );
+    } catch (Ex) {
+      print("Failure to connect - handle here");
+    }
+  }
     print(_channel.toString());
 
     _silaServiceClient = SiLAServiceClient(_channel);
@@ -194,50 +216,101 @@ class SilaClient {
           // Write request message to buffer
               (response) {
             var commandStatus = sila.CommandConfirmation.fromBuffer(response);
-            return genericSiLAMessage.commandResponse(
-                command.name, [["CommandConfirm", "CommandConfirmation"]], [commandStatus]);
+            return commandStatus;
           });
 
       genericSiLAMessage requestMessage = genericSiLAMessage.commandRequest(
           command.name, command.inputs, commandParams);
       var response = await _rawClient.$createUnaryCall(
           clientMethod, requestMessage);
-      return response.getField(1);
+      return response;
     }
     catch (Ex){
       print(Ex);
     }
   }
 
-  subscribeObsCommandInfo(var featureId, var commandId, sila.CommandConfirmation commandUUID) async
+  Future<Stream> subscribeObsCommandInfo(var featureId, var commandId, sila.CommandConfirmation commandUUID) async
   {
-    // CommandIdentifer_Info
-    return Stream.fromIterable([]);
+    try {
+      Feature feature = features[featureId];
+      Command command = feature.commands[commandId];
+
+      // Build a client call for the command
+      ClientMethod clientMethod = ClientMethod(
+          '/${feature.packageName}.${feature.serviceName}/${feature
+              .commands[commandId].name}_Info',
+              (request) => request.writeToBuffer(),
+          // Write request message to buffer
+              (response) {
+            var execInfo = sila.ExecutionInfo.fromBuffer(response);
+            return execInfo;
+          });
+
+      var response =  _rawClient.$createStreamingCall(
+          clientMethod,  Stream.fromIterable([commandUUID]));
+      return response;
+    }
+    catch (Ex){
+      print(Ex);
+    }
   }
 
-  getsObsCommandResult(var featureId, var commandId, sila.CommandConfirmation commandUUID) async {
-    // CommandIdentifier_Result
-    // This is the actual 'response' of the command
-    Feature feature = features[featureId];
-    Command command = feature.commands[commandId];
-
-    // Build a client call for the command
-    ClientMethod clientMethod = ClientMethod(
-        '/${feature.packageName}.${feature.serviceName}/${feature.commands[commandId].name}_Result',
-            (request) => request.writeToBuffer(), // Write request message to buffer
-            (response) {
-          var responseValues = parseSilaResponse(feature.commands[commandId].outputs, response);
-          return genericSiLAMessage.commandResponse("${command.name}_Responses", command.outputs, responseValues);
-        });
-
-    var response =
-        await _rawClient.$createUnaryCall(clientMethod, commandUUID);
-    return response;
-  }
- subscribeObsIntermediate(var featureId, var commandId, sila.CommandConfirmation commandUUID) async
+  Future<Stream> subscribeObsCommandIntermediateInfo(var featureId, var commandId, sila.CommandConfirmation commandUUID) async
   {
-    return Stream.fromIterable([]);
+    try {
+      Feature feature = features[featureId];
+      Command command = feature.commands[commandId];
+
+      // Build a client call for the command
+      ClientMethod clientMethod = ClientMethod(
+          '/${feature.packageName}.${feature.serviceName}/${feature
+              .commands[commandId].name}_Intermediate',
+              (request) => request.writeToBuffer(),
+          // Write request message to buffer
+              (response) {
+            var responseValues = parseSilaResponse(feature.commands[commandId].intermediates, response);
+            var responseMessage = genericSiLAMessage.commandResponse("${command.name}_Intermediate", command.intermediates, responseValues);
+            return responseMessage;
+          });
+
+      var response =  _rawClient.$createStreamingCall(
+          clientMethod,  Stream.fromIterable([commandUUID]));
+      return response;
+    }
+    catch (Ex){
+      print(Ex);
+    }
   }
+
+  Future<genericSiLAMessage> getObsCommandResult(var featureId, var commandId, sila.CommandConfirmation commandUUID) async
+  {
+    try {
+      Feature feature = features[featureId];
+      Command command = feature.commands[commandId];
+
+      // Build a client call for the command
+      ClientMethod clientMethod = ClientMethod(
+          '/${feature.packageName}.${feature.serviceName}/${feature
+              .commands[commandId].name}_Result',
+              (request) => request.writeToBuffer(),
+          // Write request message to buffer
+              (response) {
+                var responseValues = parseSilaResponse(feature.commands[commandId].outputs, response);
+                return genericSiLAMessage.commandResponse("${command.
+
+                name}_Result", command.outputs, responseValues);
+          });
+
+      var response =  await _rawClient.$createUnaryCall(
+          clientMethod,  commandUUID);
+      return response;
+    }
+    catch (Ex){
+      print(Ex);
+    }
+  }
+
 
   void parseResponse(typeMap, List<int> response) {
     var position = 0;
@@ -415,6 +488,7 @@ class Command {
   List inputs =
       []; // [Type, Name] (CommandIdentifier_Parameters), index + 1 is field
   List outputs = []; // [Type, Name] (CommandIdentifier_Responses)
+  List intermediates = []; // [Type, Name] (CommandIdentifier_Intermediate)
   bool observable;
 
   Command(this.name, this.inputs, this.outputs, this.observable);
@@ -456,6 +530,20 @@ class Command {
       // For now consider basic types only
       var type = element.findAllElements("Basic").first.text;
       outputs.add([type, responseId]);
+    }
+
+    var intermediateElement = commandElement.findElements("IntermediateResponse");
+    for (var element in intermediateElement) {
+      var responseId = element.findElements("Identifier").first.text;
+
+      var isConstrained = element.findAllElements("Constrained").isNotEmpty;
+      // Check for actual constraint ...
+
+      // Check for Derived Types
+      // is a Structure / List element present -> Yes parse diff Else
+      // For now consider basic types only
+      var type = element.findAllElements("Basic").first.text;
+      intermediates.add([type, responseId]);
     }
   }
 }
