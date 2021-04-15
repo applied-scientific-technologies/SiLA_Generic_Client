@@ -1,5 +1,32 @@
 # SiLA_Generic_Client
 
+## Intro
+
+We aim to develop a generic SiLA client capable of SiLA server-client communication without the use of pre-generated stubs enabling simpler and quicker interaction with SiLA Servers and Devices
+
+Through the use Flutter Framework a multi-platform client should be achievable, capable of running on mobile devices, desktop machines or as a web application
+
+This project does not require the use of external tooling such a code generator or protoc, it aims to generate the required gRPC/Protobuf internally using queried Feature Definitions, because of this the client is self contained and should not require any external software to be run
+
+A prototype client is currently under development and is capable of querying SiLA Servers and building the required messages to make calls using several basic SiLA types to Properties and Commands
+
+## Screenshots
+
+<p float="left">
+
+<img src="sila_client/screenshots/silaClientAndroid.png" alt="AndroidClient" width="200">
+
+<img src="sila_client/screenshots/silaClientLinux.png" alt="LinuxClient" width="200">
+
+<img src="sila_client/screenshots/silaClientMacOS.png" alt="MacOSClient" width="200">
+
+<img src="sila_client/screenshots/silaClientWIn.png" alt="WindowsClient" width="200">
+
+<img src="sila_client/screenshots/silaClientiOS.png" alt="iOSClient" width="200">
+
+</p>
+
+
 ## Installation 
 
 ### Requirements
@@ -21,25 +48,28 @@
 
 - Clone the repo `git clone https://github.com/applied-scientific-technologies/SiLA_Generic_Client.git`
 - Open the project in Android Studio
-- Modify the line within `main.dart`
-   - `SilaClient _client = SilaClient("192.168.10.5", 50052, true);` to connect to the IP of your example server
-   - If using Python change `true` to `false` (this toggles between secure/insecure connection)
-- Uncomment the relevant function for your server
-  - `await testHelloWorld(_client);` is configured for the Java HelloWorld example
-  - `await testObsProperty(_client);` is configured for the Python ObservableProperty example
-  - `await testObsCommand(_client);` is configured for the Python ObservableCommand example
-   
-- Select target device and press Run
-  - Responses will be printed out to console, e.g.
-  
-  ```
-  I/flutter (11769): Greeting: {
-  I/flutter (11769):   value: Hello Joe
-  I/flutter (11769): }
-  I/flutter (11769): StartYear: {
-  I/flutter (11769):   value: 2021
-  I/flutter (11769): }
-  ```
+- Ensure a device on emulator is connected and press Run
+
+- Enter Server IP/Port, if no self-signed certificate is being used uncheck the secure connection checkbox (Python Demo Server)
+- Press connect and the client will attempt to connect to the server and display found features
+
+- Three test buttons are also present, each will attempt to send a preconfigured command to the Server
+  - **The correct Server must be running for the preset command buttons to work**
+  - **TestHello -> Java HelloWorld Example**
+  - **TestOProp -> Python Observable Property Example**
+  - **TestOCmd -> Python Observable Command Example**
+
+- Responses from successful commands will be displayed in the output box, e.g.
+
+```
+Greeting: {
+   value: Hello Joe
+}
+StartYear: {
+   value: 2021
+}
+```
+ 
   
 ### Calling Different Commands
 
