@@ -5,12 +5,12 @@ import 'package:fixnum/fixnum.dart';
 import 'package:sila_client/SiLA/SiLAFramework.pb.dart' as sila;
 
 void main() async {
-  SilaClient _client = SilaClient("192.168.10.5", 50052, false);
-  await _client.connectToServer();
+  // SilaClient _client = SilaClient("192.168.10.5", 50052, false);
+  // await _client.connectToServer();
 
-  //await testHelloWorld(_client);
+  // await testHelloWorld(_client);
   //await testObsProperty(_client);
-  await testObsCommand(_client);
+  // await testObsCommand(_client);
 
   // To Implement/Test
   //  Structs / Lists
