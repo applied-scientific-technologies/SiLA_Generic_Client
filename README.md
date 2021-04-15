@@ -2,7 +2,7 @@
 
 ## Intro
 
-We aim to develop a generic SiLA client capable of SiLA server-client communication without the use of pre-generated stubs enabling simpler and quicker interaction with SiLA Servers and Devices
+We aim to develop a generic SiLA client capable of SiLA server-client communication without the use of additional pre-generated stubs enabling simpler and quicker interaction with SiLA Servers and Devices
 
 Through the use Flutter Framework a multi-platform client should be achievable, capable of running on mobile devices, desktop machines or as a web application
 
