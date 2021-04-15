@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sila_client/silaClient.dart';
+import 'package:fixnum/fixnum.dart';
+import 'package:sila_client/SiLA/SiLAFramework.pb.dart' as sila;
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -14,6 +16,8 @@ class _MyHomePageState extends State<MyHomePage> {
   var serverAddress = '192.168.0.53:50052';
   final tfc = TextEditingController(text: '192.168.0.53:50052');
   List<Feature> features = [];
+  SilaClient _client;
+  String outputText = "";
 
   @override
   Widget build(BuildContext context) {
@@ -44,8 +48,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
                               if (ip != null && port != null) {
                                 try {
-                                  SilaClient _client =
-                                      SilaClient(ip, port, true);
+                                  _client =
+                                      SilaClient(ip, port, false);
                                   await _client.connectToServer();
 
                                   setState(() {
@@ -64,12 +68,22 @@ class _MyHomePageState extends State<MyHomePage> {
                                 print('Something has gone wrong');
                               }
                             }),
-                      )
+                      ),
+                    Padding(padding: const EdgeInsets.all(20.0),
+                      child: Row(children:
+                      [
+                       ElevatedButton(child: Text("TestHello"), onPressed: _client != null ? () async {await testHelloWorld(_client);} : null,),
+                       Spacer(),
+                       ElevatedButton(child: Text("TestOProp"),onPressed: _client != null ? () async {await testObsProperty(_client);} : null,),
+                       Spacer(),
+                       ElevatedButton(child: Text("TestOCmd"), onPressed: _client != null ? () async {await testObsCommand(_client);} : null,)
+                      ])),
                     ],
                   ),
                 )
               ]),
             ),
+
             SliverList(
               delegate: SliverChildBuilderDelegate((context, index) {
                 var feature = features[index];
@@ -100,5 +114,63 @@ class _MyHomePageState extends State<MyHomePage> {
     var property_response = await _client.getProperty(0, 0);
     print(command_response);
     print(property_response);
+    setState(() {
+      outputText = "$command_response\n$property_response";
+    });
+  }
+
+  testObsProperty(_client) async {
+    var sub_stream = await _client.subscribeProperty(2, 0);
+
+    sub_stream.listen((propChange) {
+      print(propChange);
+      setState(() {
+        outputText = "$propChange";
+      });
+    });
+
+    //Observable Property Example -> Python Observable Property Example
+    var command_response = await _client.callCommand(2, 0, [Int64(100)]);
+    await Future.delayed(Duration(seconds: 10));
+    command_response = await _client.callCommand(2, 0, [Int64(200)]);
+    await Future.delayed(Duration(seconds: 10));
+    command_response = await _client.callCommand(2, 0, [Int64(300)]);
+    await Future.delayed(Duration(seconds: 10));
+  }
+
+
+
+  testObsCommand(_client) async {
+    // Observable Command -> Python Observable Command Example
+    var obs_command_uuid = await _client.callObsCommand(2, 0, [125.50, 250.50]);
+
+    // Listen to Command
+    var command_stream =
+    await _client.subscribeObsCommandInfo(2, 0, obs_command_uuid);
+    var intermediate_stream =
+    await _client.subscribeObsCommandIntermediateInfo(2, 0, obs_command_uuid);
+
+    command_stream.listen((execInfo) async {
+      if (execInfo.commandStatus ==
+          sila.ExecutionInfo_CommandStatus.finishedSuccessfully) {
+        var command_result =
+        await _client.getObsCommandResult(2, 0, obs_command_uuid);
+        print("Final Result - $command_result");
+        setState(() {
+          outputText = "$command_result";
+        });
+      }
+      setState(() {
+        outputText = "$execInfo";
+      });
+      print("Exec Info - $execInfo");
+    });
+
+    intermediate_stream.listen((interInfo) {
+      setState(() {
+        outputText = "$interInfo";
+      });
+      print("Intermediate - $interInfo");
+    });
   }
 }
