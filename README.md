@@ -1,8 +1,8 @@
 # SiLA_Generic_Client
 
-* Installation 
+## Installation 
 
-** Requirements
+### Requirements
 
 - Flutter (https://flutter.dev)
 
@@ -15,7 +15,7 @@
     - https://gitlab.com/SiLA2/sila_python (ObservableProperty, ObservableCommand)
     - https://gitlab.com/SiLA2/sila_java (HelloWorld)
 
-** Setup and Running
+### Setup and Running
 
 - Setup SiLA Example Server and note down IP (localhost if on same machine)
 
@@ -41,7 +41,7 @@
   I/flutter (11769): }
   ```
   
-** Calling Different Commands
+### Calling Different Commands
 
 This is currently fairly clunky as no GUI mappings are in place, once the client connects to a server it builds a `Feature` object for every Feature Definition returned
 by the server. The client holds these feature objects in a list [Feature_1, Feature_2, Feature_N] and each Feature holds Command/Property objects which are determined during 
@@ -63,14 +63,16 @@ than a single response message
 *Note that only a few of the basic types are supported at present so commands requiring more complex parameters will not yet work (Lists / Structs / etc)*
 
 
-* Todos / Notes
+# Todos / Notes
 
-*** Universal Client, installed locally or deployed in cloud
+Notes around work packages outlined in proposal request
+
+### Universal Client, installed locally or deployed in cloud
   - Front end should be platform independent, pref web app
 
 *Should be covered by Flutter's cross platform capabilities*
 
-*** Server management
+### Server management
   - Add / Remove
   - List Features
   - Discovery supported
@@ -79,7 +81,7 @@ than a single response message
 *Adding / Removing servers manually is fairly basic user input*  
 
 
-*** Command Execution
+### Command Execution
   - Parameter Input
   - Display Responses
   - Intermediate Command Responses (Observable Commands)
@@ -91,7 +93,7 @@ than a single response message
 *Currently only supports a couple basic types, further investigation to do regarding Derived types (Structs, Lists)*
 *Unit constraints can be parsed from the FDL and handled at Client front end on user inputs*
 
-*** Property Handling
+### Property Handling
   - Observable 
   - Unobservable
 
@@ -99,20 +101,20 @@ than a single response message
 *Responses are correctly rebuilt*
 *Current support for only a couple basic types, further work to be done here*
 
-*** Support server-initiated connection method
+### Support server-initiated connection method
 
 *Potentially this is a lot of work, from initial understanding a SiLA Server would need to be hosted on the device*
 *alongside the client, currently there is no Dart implementation of a SiLA Server*
 
-*** Support core Features from sila standard core 
+### Support core Features from sila standard core 
 
 *We will have the stubs for these so shouldn't too difficult to wrap into GUI*
 
-***  Support SiLA Client Meta Data, plug in mechanism?
+### Support SiLA Client Meta Data, plug in mechanism?
 
 *Further research needed on what this entails*
 
-*** Error Handling
+### Error Handling
   - Validation
   - Execution
   - Framework
@@ -121,6 +123,6 @@ than a single response message
 *Further work to be done here, looks like SiLA errors build on top of gRPC Errors*
 *Should also have the stubs for these types too*
 
-*** Testing / Documention Meetings
+### Testing / Documention Meetings
 
 *Should be ongoing during development*
