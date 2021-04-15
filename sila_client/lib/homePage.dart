@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:grpc/grpc.dart';
 import 'package:sila_client/silaClient.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:sila_client/SiLA/SiLAFramework.pb.dart' as sila;
@@ -43,13 +44,16 @@ class _MyHomePageState extends State<MyHomePage> {
                         child: ElevatedButton(
                             child: Text('Connect to server and list features'),
                             onPressed: () async {
+                              setState(() {
+                                outputText = '';
+                                features = [];
+                              });
                               var ip = tfc.text.split(':')[0];
                               var port = int.tryParse(tfc.text.split(':')[1]);
 
                               if (ip != null && port != null) {
                                 try {
-                                  _client =
-                                      SilaClient(ip, port, false);
+                                  _client = SilaClient(ip, port, true);
                                   await _client.connectToServer();
 
                                   setState(() {
@@ -69,21 +73,47 @@ class _MyHomePageState extends State<MyHomePage> {
                               }
                             }),
                       ),
-                    Padding(padding: const EdgeInsets.all(20.0),
-                      child: Row(children:
-                      [
-                       ElevatedButton(child: Text("TestHello"), onPressed: _client != null ? () async {await testHelloWorld(_client);} : null,),
-                       Spacer(),
-                       ElevatedButton(child: Text("TestOProp"),onPressed: _client != null ? () async {await testObsProperty(_client);} : null,),
-                       Spacer(),
-                       ElevatedButton(child: Text("TestOCmd"), onPressed: _client != null ? () async {await testObsCommand(_client);} : null,)
-                      ])),
+                      Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Row(children: [
+                            ElevatedButton(
+                              child: Text("TestHello"),
+                              onPressed: _client != null
+                                  ? () async {
+                                      await testHelloWorld(_client);
+                                    }
+                                  : null,
+                            ),
+                            Spacer(),
+                            ElevatedButton(
+                              child: Text("TestOProp"),
+                              onPressed: _client != null
+                                  ? () async {
+                                      await testObsProperty(_client);
+                                    }
+                                  : null,
+                            ),
+                            Spacer(),
+                            ElevatedButton(
+                              child: Text("TestOCmd"),
+                              onPressed: _client != null
+                                  ? () async {
+                                      await testObsCommand(_client);
+                                    }
+                                  : null,
+                            )
+                          ])),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Text('Command output: $outputText'),
+                        ],
+                      )
                     ],
                   ),
                 )
               ]),
             ),
-
             SliverList(
               delegate: SliverChildBuilderDelegate((context, index) {
                 var feature = features[index];
@@ -138,23 +168,21 @@ class _MyHomePageState extends State<MyHomePage> {
     await Future.delayed(Duration(seconds: 10));
   }
 
-
-
   testObsCommand(_client) async {
     // Observable Command -> Python Observable Command Example
     var obs_command_uuid = await _client.callObsCommand(2, 0, [125.50, 250.50]);
 
     // Listen to Command
     var command_stream =
-    await _client.subscribeObsCommandInfo(2, 0, obs_command_uuid);
-    var intermediate_stream =
-    await _client.subscribeObsCommandIntermediateInfo(2, 0, obs_command_uuid);
+        await _client.subscribeObsCommandInfo(2, 0, obs_command_uuid);
+    var intermediate_stream = await _client.subscribeObsCommandIntermediateInfo(
+        2, 0, obs_command_uuid);
 
     command_stream.listen((execInfo) async {
       if (execInfo.commandStatus ==
           sila.ExecutionInfo_CommandStatus.finishedSuccessfully) {
         var command_result =
-        await _client.getObsCommandResult(2, 0, obs_command_uuid);
+            await _client.getObsCommandResult(2, 0, obs_command_uuid);
         print("Final Result - $command_result");
         setState(() {
           outputText = "$command_result";
