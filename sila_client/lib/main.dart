@@ -5,59 +5,71 @@ import 'package:fixnum/fixnum.dart';
 import 'package:sila_client/SiLA/SiLAFramework.pb.dart' as sila;
 
 void main() async {
-
-  var exec_count = 0;
-  var inter_count = 0;
-
-  SilaClient _client = SilaClient("192.168.10.5", 50051, false);
+  SilaClient _client = SilaClient("192.168.10.5", 50052, false);
   await _client.connectToServer();
 
-  // Observable Command
-  var obs_command_uuid = await _client.callObsCommand(2,0, [125.50, 250.50]);
+  //await testHelloWorld(_client);
+  //await testObsProperty(_client);
+  await testObsCommand(_client);
 
-  // Listen to Command
-  var command_stream = await _client.subscribeObsCommandInfo(2, 0, obs_command_uuid);
-  var intermediate_stream = await _client.subscribeObsCommandIntermediateInfo(2, 0, obs_command_uuid);
-
-  command_stream.listen((execInfo) async {
-    if (execInfo.commandStatus == sila.ExecutionInfo_CommandStatus.finishedSuccessfully){
-      var command_result = await _client.getObsCommandResult(2, 0, obs_command_uuid);
-      print("Done");
-    }
-    exec_count++;
-    print("EXEC INFO - $exec_count");
-  });
-
-  intermediate_stream.listen((event){
-    inter_count++;
-    print("INTERMEDIATE INFO - $inter_count");
-  });
-
-  // HelloWorld Example
-  //var command_response = await _client.callCommand(0, 0, ["Joe"]);
-  //var property_response = await _client.getProperty(0, 0);
-
- // var sub_stream = await _client.subscribeProperty(, 0);
-
-  //sub_stream.listen((event) {
-  //  print(event);
-  //});
-
-  //Observable Property Example
-  //var command_response = await _client.callCommand(2, 0, [Int64(100)]);
-  //await Future.delayed(Duration(seconds: 10));
-  //command_response = await _client.callCommand(2, 0, [Int64(200)]);
-  //await Future.delayed(Duration(seconds: 10));
-  //command_response = await _client.callCommand(2, 0, [Int64(300)]);
-  //await Future.delayed(Duration(seconds: 10));
-
+  // To Implement/Test
+  //  Structs / Lists
+  //  SiLA Errors
+  //  Metadata
 
   runApp(MyApp());
 }
 
+testObsProperty(_client) async {
+  var sub_stream = await _client.subscribeProperty(2, 0);
+
+  sub_stream.listen((event) {
+    print(event);
+  });
+
+  //Observable Property Example -> Python Observable Property Example
+  var command_response = await _client.callCommand(2, 0, [Int64(100)]);
+  await Future.delayed(Duration(seconds: 10));
+  command_response = await _client.callCommand(2, 0, [Int64(200)]);
+  await Future.delayed(Duration(seconds: 10));
+  command_response = await _client.callCommand(2, 0, [Int64(300)]);
+  await Future.delayed(Duration(seconds: 10));
+}
+
+testHelloWorld(_client) async {
+  // HelloWorld Example -> Java Hello World Example
+  var command_response = await _client.callCommand(0, 0, ["Joe"]);
+  var property_response = await _client.getProperty(0, 0);
+  print(command_response);
+  print(property_response);
+}
+
+testObsCommand(_client) async {
+  // Observable Command -> Python Observable Command Example
+  var obs_command_uuid = await _client.callObsCommand(2, 0, [125.50, 250.50]);
+
+  // Listen to Command
+  var command_stream =
+      await _client.subscribeObsCommandInfo(2, 0, obs_command_uuid);
+  var intermediate_stream =
+      await _client.subscribeObsCommandIntermediateInfo(2, 0, obs_command_uuid);
+
+  command_stream.listen((execInfo) async {
+    if (execInfo.commandStatus ==
+        sila.ExecutionInfo_CommandStatus.finishedSuccessfully) {
+      var command_result =
+          await _client.getObsCommandResult(2, 0, obs_command_uuid);
+      print("Final Result - $command_result");
+    }
+    print("Exec Info - $execInfo");
+  });
+
+  intermediate_stream.listen((interInfo) {
+    print("Intermediate - $interInfo");
+  });
+}
+
 class MyApp extends StatelessWidget {
-
-
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -79,5 +91,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-
