@@ -4,11 +4,11 @@
 
 We aim to develop a generic SiLA client capable of SiLA server-client communication without the use of additional pre-generated stubs enabling simpler and quicker interaction with SiLA Servers and Devices
 
-Through the use Flutter Framework a multi-platform client should be achievable, capable of running on mobile devices, desktop machines or as a web application
+Through the use of the Flutter Framework a multi-platform client should be achievable, capable of running on mobile devices, desktop machines or as a web application
 
-This project does not require the use of external tooling such a code generator or protoc, it aims to generate the required gRPC/Protobuf internally using queried Feature Definitions, because of this the client is self contained and should not require any external software to be run
+This project does not require the use of external tooling such a code generator or protoc, it aims to generate the required gRPC/Protobuf internally using queried Feature Definitions, because of this the client is self contained and should not require any external software to be run alongside it
 
-A prototype client is currently under development and is capable of querying SiLA Servers and building the required messages to make calls using several basic SiLA types to Properties and Commands
+A prototype client is currently under development and is capable of querying SiLA Servers and building the required messages to make and receive calls using several basic SiLA types to Properties and Commands 
 
 ## Screenshots
 
