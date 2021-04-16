@@ -104,25 +104,27 @@ Similar calls are also implemented for properties and observables, subscribing c
 Notes around work packages outlined in proposal request
 
 ### Universal Client, installed locally or deployed in cloud
-  - Front end should be platform independent, pref web app
+ - [x] Front end should be platform independent, pref web app
 
 *Should be covered by Flutter's cross platform capabilities*
 
+*Note there are currently some issues with the Dart GRPC library and Flutter web the prevents the application from currently being run in a web browser, we expect these issues could be worked around or should be solved during development [https://github.com/flutter/flutter/issues/48054](https://github.com/flutter/flutter/issues/48054)*
+
 ### Server management
-  - Add / Remove
-  - List Features
-  - Discovery supported
+  - [ ] Add / Remove
+  - [ ] List Features
+  - [ ] Discovery supported
 
 *We have looked into discovery already in DEFT so should carry over, Listing Features is do-able as we already request Definitions*
 *Adding / Removing servers manually is fairly basic user input*  
 
 
 ### Command Execution
-  - Parameter Input
-  - Display Responses
-  - Intermediate Command Responses (Observable Commands)
-  - Handle SiLA Basic Types + SiLA Derived Types
-  - Handle Unit Constraints 
+  - [ ] Parameter Input
+  - [ ] Display Responses
+  - [ ] Intermediate Command Responses (Observable Commands)
+  - [ ] Handle SiLA Basic Types + SiLA Derived Types
+  - [ ] Handle Unit Constraints 
 
 *Initial testing has shown commands can be executed, both observable and unobservable*
 *Responses are correctly rebuilt, intermediate responses are also handled*
@@ -130,8 +132,8 @@ Notes around work packages outlined in proposal request
 *Unit constraints can be parsed from the FDL and handled at Client front end on user inputs*
 
 ### Property Handling
-  - Observable 
-  - Unobservable
+  - [ ] Observable 
+  - [ ] Unobservable
 
 *Initial testing has shown properties can be executed, observable and unobservable*
 *Responses are correctly rebuilt*
@@ -151,10 +153,10 @@ Notes around work packages outlined in proposal request
 *Further research needed on what this entails*
 
 ### Error Handling
-  - Validation
-  - Execution
-  - Framework
-  - Connection
+  - [ ] Validation
+  - [ ] Execution
+  - [ ] Framework
+  - [ ] Connection
 
 *Further work to be done here, looks like SiLA errors build on top of gRPC Errors*
 *Should also have the stubs for these types too*
